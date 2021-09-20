@@ -1,69 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import "./App.css";
 import { AddTodo } from "./components/AddTodo";
 import { FilterTodosOption } from "./components/FilterTodosOption";
 import { Todos } from "./components/Todos";
-import { defaultTodos, getKey, Todo } from "./util";
-
-type defaultTodosType = typeof defaultTodos;
+import { useAddTodos } from "./hooks/useAddTodos";
+import { useOnEditAble } from "./hooks/useOnEditAble";
+import { useChangeTodoState } from "./hooks/useChangeTodoState";
+import { useFilterTodos } from "./hooks/useFIlterTodos";
 
 function App() {
-  const [value, setValue] = useState<string>("");
-  const [todos, setTodos] = useState<defaultTodosType>(defaultTodos);
-  const [filter, setFilter] = useState<string>("all");
-
-  const onChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-  };
-
-  const onAddTodo = (): void => {
-    if (value === "") {
-      alert("タスク名が入力されていません");
-      return;
-    }
-    setTodos([
-      ...todos,
-      { key: getKey(), text: value, done: false, editAble: false },
-    ]);
-    setValue("");
-  };
-
-  const changeTodoState = (key: string): void => {
-    const newTodos = todos.map((todo) => {
-      if (todo.key === key) {
-        todo.done = !todo.done;
-      }
-      todo.editAble = false;
-      return todo;
-    });
-    setTodos(newTodos);
-  };
-
-  const onEditAble = (key: string): void => {
-    const newTodos = todos.map((todo) => {
-      if (todo.key === key) {
-        todo.editAble = !todo.editAble;
-      }
-      return todo;
-    });
-    setTodos(newTodos);
-  };
-
-  const handleFilter = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const filterLabel = e.target.value;
-    setFilter(filterLabel);
-  };
-
-  const filterdTodos = (): Todo[] => {
-    if (filter === "done") {
-      return todos.filter((todo) => todo.done === true);
-    } else if (filter === "running") {
-      return todos.filter((todo) => todo.done === false);
-    } else {
-      return todos.filter((todo) => todo.done === true || todo.done === false);
-    }
-  };
+  const { todos, setTodos, value, onAddTodo, onChangeValue } = useAddTodos();
+  const { onEditAble } = useOnEditAble(todos, setTodos);
+  const { changeTodoState } = useChangeTodoState(todos, setTodos);
+  const { filterdTodos, handleFilter } = useFilterTodos(todos);
 
   return (
     <div className="App">
